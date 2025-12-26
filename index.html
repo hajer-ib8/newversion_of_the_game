@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محاكي عالم الوومبوس</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav id="navbar">
+        <div id="navbar-brand">عالم الوومبوس</div>
+        <ul id="navbar-links">
+            <li><a href="#" id="nav-new-game"><span class="nav-text">لعبة جديدة</span><span class="nav-icon">🎮</span></a></li>
+            <li><a href="#" id="nav-how-to-play"><span class="nav-text">كيفية اللعب</span><span class="nav-icon">❓</span></a></li>
+        </ul>
+    </nav>
+
+    <div id="game-container">
+        <div id="controls-panel-box">
+            <h3>التحكم</h3>
+            <div id="controls-grid">
+                <button id="btn-left" title="الدوران يسارًا (A)">⬅️</button>
+                <button id="btn-move" title="التقدم للأمام (W)">⬆️</button>
+                <button id="btn-right" title="الدوران يمينًا (D)">➡️</button>
+            </div>
+            <div id="action-controls">
+                <button id="btn-shoot" title="إطلاق السهم (F)">إطلاق</button>
+                <button id="btn-grab" title="التقاط الذهب (G)">التقاط</button>
+            </div>
+            <button id="btn-new-game" title="إعادة تشغيل اللعبة">لعبة جديدة</button>
+        </div>
+        <div id="grid-container">
+            <div id="wumpus-grid"></div>
+        </div>
+        <div id="ui-panel">
+            <div class="panel-box">
+                <div id="game-status-message" class="play">اللعبة جارية...</div>
+                <div id="score-display">النقاط: 0</div>
+            </div>
+            <div class="panel-box">
+                <h3>الاشارات</h3>
+                <ul id="percept-list">
+                    <li id="percept-stench">🤢 رائحة كريهة</li>
+                    <li id="percept-breeze">💨 نسيم</li>
+                    <li id="percept-glitter">✨ لمعان</li>
+                    <li id="percept-bump">💥 صدمة</li>
+                    <li id="percept-scream">😱 صرخة</li>
+                </ul>
+            </div>
+            <div class="panel-box">
+                <h3>حالة الوكيل</h3>
+                <ul id="status-list">
+                    <li id="status-arrow">🏹 سهم: 1</li>
+                    <li id="status-gold">💰 ذهب: لا</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-overlay">
+        <div id="modal-content">
+            <span id="modal-close">&times;</span>
+            <h2 id="modal-title"></h2>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <div id="mobile-controls">
+        <div id="controls-grid-mobile">
+            <button id="btn-left-mobile" title="الدوران يسارًا (A)">⬅️</button>
+            <button id="btn-move-mobile" title="التقدم للأمام (W)">⬆️</button>
+            <button id="btn-right-mobile" title="الدوران يمينًا (D)">➡️</button>
+        </div>
+        <div id="action-controls-mobile">
+            <button id="btn-shoot-mobile" title="إطلاق السهم (F)">إطلاق</button>
+            <button id="btn-grab-mobile" title="التقاط الذهب (G)">التقاط</button>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

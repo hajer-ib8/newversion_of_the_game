@@ -1,0 +1,576 @@
+/* --- Modern Dark/Neon Theme --- */
+:root {
+    --grid-cols: 4;
+    --grid-rows: 4;
+    --cell-size: 110px; /* Default desktop cell size */
+    --font-main: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    
+    /* Color Palette */
+    --color-bg-start: #ff69b4;
+    --color-bg-end: #ffb6c1;
+    --color-panel: #ffb6c1;
+    --color-border: #ff1493;
+    --color-text-light: #000000;
+    --color-text-medium: #000000;
+    --color-text-dark: #000000;
+    --color-brand: #ff1493;
+    --color-gold: #ffd700;
+    --color-safe: #ffb6c1;
+    --color-danger: #ff6347;
+    --color-wumpus: #da70d6;
+    --color-breeze: #ffc0cb;
+    --color-grid-unvisited: #ffc0cb;
+    --color-grid-visited: #ff69b4;
+    
+    /* Glow Effects */
+    --glow-brand: rgba(255, 20, 147, 0.3);
+    --glow-gold: rgba(255, 215, 0, 0.4);
+    --glow-danger: rgba(255, 99, 71, 0.3);
+    --glow-safe: rgba(255, 182, 193, 0.3);
+    --glow-wumpus: rgba(218, 112, 214, 0.4);
+    --glow-breeze: rgba(255, 192, 203, 0.4);
+}
+
+body {
+    font-family: var(--font-main);
+    background: linear-gradient(135deg, var(--color-bg-start) 0%, var(--color-bg-end) 100%);
+    color: var(--color-text-light);
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- Navbar --- */
+#navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 30px;
+    background-color: var(--color-panel);
+    border-bottom: 2px solid var(--color-border);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    height: 60px;
+    width: 100%;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+#navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: black;
+    text-shadow: 0 0 10px var(--glow-brand);
+}
+#navbar-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 10px;
+}
+#navbar-links li a {
+    display: block;
+    padding: 8px 12px;
+    text-decoration: none;
+    color: var(--color-text-medium);
+    font-weight: 500;
+    border-radius: 5px;
+    transition: background-color 0.2s, color 0.2s;
+}
+#navbar-links li a:hover {
+    background-color: var(--color-border);
+    color: var(--color-text-light);
+}
+        
+.nav-icon, .nav-sound-icon {
+    display: none;
+}
+
+/* --- Game Container --- */
+#game-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    max-width: 1100px;
+    margin: 30px auto;
+    width: 100%;
+    flex-grow: 1;
+    padding: 0 20px;
+    box-sizing: border-box;
+    justify-content: center;
+}
+
+/* --- Controls Panel (Left) --- */
+#controls-panel-box {
+    flex-basis: 250px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* --- Game Grid --- */
+#grid-container {
+    width: calc(var(--cell-size) * var(--grid-cols) + 6px);
+    flex-shrink: 0;
+}
+
+#wumpus-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--grid-cols), var(--cell-size));
+    grid-template-rows: repeat(var(--grid-rows), var(--cell-size));
+    border: 3px solid var(--color-border);
+    position: relative;
+    background-color: var(--color-panel);
+    box-shadow: 0 0 20px var(--glow-brand);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.grid-cell {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    background-color: var(--color-grid-unvisited);
+    border: 1px solid var(--color-border);
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    transition: background-color 0.3s;
+}
+.grid-cell.visited {
+    background-color: var(--color-grid-visited);
+}
+.grid-cell::before {
+    content: attr(data-coords);
+    position: absolute;
+    bottom: 4px;
+    left: 5px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: black;
+    opacity: 0.5;
+}
+
+/* Agent */
+.agent {
+    font-size: 3.5rem;
+    z-index: 10;
+    transition: transform 0.2s linear, color 0.2s, text-shadow 0.2s, font-size 0.2s;
+    visibility: hidden;
+    opacity: 0;
+    transform: scale(0.8);
+    color: var(--color-gold);
+    text-shadow: 0 0 15px var(--glow-gold);
+}
+.grid-cell.current .agent {
+    visibility: visible;
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Cell Items */
+.cell-content {
+    font-size: 3rem;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.5s, font-size 0.2s;
+    position: absolute;
+    text-shadow: 0 0 15px var(--glow-danger);
+}
+.cell-content.gold {
+    text-shadow: 0 0 15px var(--glow-gold);
+}
+.game-over .cell-content { visibility: visible; opacity: 0.5; }
+.game-over .grid-cell.visited .cell-content { opacity: 1; }
+.grid-cell.current .gold { visibility: visible; opacity: 1; }
+
+/* --- UI Panel (Right) --- */
+#ui-panel {
+    flex-grow: 1;
+    flex-basis: 300px;
+    min-width: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.panel-box {
+    background-color: var(--color-panel);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: box-shadow 0.3s;
+}
+.panel-box:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+.panel-box h3 {
+    margin: 0 0 15px 0;
+    border-bottom: 2px solid var(--color-border);
+    padding-bottom: 10px;
+    text-align: center;
+    font-size: 1.1rem;
+    color: black;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Controls (Desktop) */
+#controls-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+#controls-grid button {
+    padding: 15px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    background-color: var(--color-breeze);
+    color: black;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 0 10px var(--glow-breeze);
+}
+#controls-grid button:hover {
+    background-color: #4ea8e1;
+    transform: translateY(-2px);
+}
+#controls-grid button:active {
+    transform: scale(0.95);
+}
+#btn-move { grid-column: 2; }
+#btn-left { grid-column: 1; }
+#btn-right { grid-column: 3; }
+
+#action-controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 15px;
+}
+#action-controls button {
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+#btn-shoot {
+    background-color: var(--color-danger);
+    box-shadow: 0 0 10px var(--glow-danger);
+}
+#btn-shoot:hover { background-color: #f85c4c; transform: translateY(-2px); }
+#btn-grab {
+    background-color: var(--color-safe);
+    box-shadow: 0 0 10px var(--glow-safe);
+}
+#btn-grab:hover { background-color: #3fdc81; transform: translateY(-2px); }
+        
+#btn-new-game {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    background-color: var(--color-gold);
+    color: var(--color-text-dark);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 15px;
+    box-shadow: 0 0 10px var(--glow-gold);
+}
+#btn-new-game:hover { background-color: #f3d02f; transform: translateY(-2px); }
+#btn-new-game:active { transform: scale(0.98); }
+
+/* Percepts & Status */
+#percept-list, #status-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+#percept-list li, #status-list li {
+    font-size: 1rem;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: var(--color-grid-unvisited);
+    color: var(--color-text-medium);
+    text-align: center;
+    font-weight: 500;
+    border: 1px solid var(--color-border);
+    transition: all 0.3s;
+}
+        
+#percept-list li.active {
+    font-weight: bold;
+    transform: scale(1.05);
+    color: white;
+}
+#percept-stench.active { background-color: var(--color-wumpus); box-shadow: 0 0 10px var(--glow-wumpus); }
+#percept-breeze.active { background-color: var(--color-breeze); box-shadow: 0 0 10px var(--glow-breeze); }
+#percept-glitter.active { background-color: var(--color-gold); color: var(--color-text-dark); box-shadow: 0 0 10px var(--glow-gold); }
+#percept-bump.active { background-color: var(--color-danger); box-shadow: 0 0 10px var(--glow-danger); }
+#percept-scream.active { background-color: #e67e22; box-shadow: 0 0 10px #e67e22; }
+
+#status-arrow.active { background-color: #7f8c8d; color: white; }
+#status-gold.active { background-color: var(--color-gold); color: var(--color-text-dark); box-shadow: 0 0 10px var(--glow-gold); }
+
+/* Game Log / Status */
+#game-status-message {
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-align: center;
+    padding: 10px;
+    border-radius: 5px;
+    line-height: 1.4;
+    transition: all 0.3s;
+}
+#game-status-message.win {
+    color: var(--color-safe);
+    border: 2px solid var(--color-safe);
+    background-color: rgba(46, 204, 113, 0.1);
+    box-shadow: 0 0 10px var(--glow-safe);
+}
+#game-status-message.lose {
+    color: var(--color-danger);
+    border: 2px solid var(--color-danger);
+    background-color: rgba(231, 76, 60, 0.1);
+    box-shadow: 0 0 10px var(--glow-danger);
+}
+#game-status-message.play {
+    color: var(--color-text-medium);
+    border: 2px solid var(--color-border);
+    background-color: var(--color-grid-unvisited);
+}
+
+#score-display {
+    font-size: 1.3rem;
+    font-weight: bold;
+    text-align: center;
+    color: var(--color-text-light);
+    margin-top: 15px;
+}
+
+/* --- Modal Styles --- */
+#modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+#modal-content {
+    background: var(--color-panel);
+    padding: 25px;
+    border-radius: 8px;
+    max-width: 600px;
+    width: 90%;
+    position: relative;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--color-border);
+}
+#modal-close {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 2.5rem;
+    color: var(--color-text-medium);
+    cursor: pointer;
+    transition: color 0.2s;
+}
+#modal-close:hover { color: var(--color-text-light); }
+#modal-title {
+    margin-top: 0;
+    color: black;
+    border-bottom: 2px solid var(--color-border);
+    padding-bottom: 10px;
+}
+#modal-body {
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--color-text-light);
+    max-height: 70vh;
+    overflow-y: auto;
+}
+#modal-body kbd {
+    font-family: monospace;
+    font-size: 1rem;
+    font-weight: bold;
+    background-color: var(--color-grid-unvisited);
+    border: 1px solid var(--color-border);
+    padding: 2px 6px;
+    border-radius: 3px;
+    color: var(--color-text-light);
+}
+#modal-body ul { margin-left: 20px; padding-left: 10px; }
+#modal-body hr { border: none; border-top: 1px solid var(--color-border); }
+        
+/* ========================================
+--- NEW: MOBILE STICKY CONTROLS BAR ---
+=======================================
+*/
+#mobile-controls {
+    display: none; /* Hidden on desktop */
+    position: sticky;
+    bottom: 0;
+    z-index: 100;
+    background-color: var(--color-panel);
+    border-top: 2px solid var(--color-border);
+    padding: 15px;
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
+}
+#controls-grid-mobile {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+}
+#controls-grid-mobile button {
+    padding: 15px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    background-color: var(--color-breeze);
+    color: black;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 0 10px var(--glow-breeze);
+}
+#controls-grid-mobile button:active { transform: scale(0.95); }
+#btn-move-mobile { grid-column: 2; }
+#btn-left-mobile { grid-column: 1; }
+#btn-right-mobile { grid-column: 3; }
+
+#action-controls-mobile {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 15px;
+}
+#action-controls-mobile button {
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: bold;
+    color: black;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+#btn-shoot-mobile {
+    background-color: var(--color-danger);
+    box-shadow: 0 0 10px var(--glow-danger);
+}
+#btn-grab-mobile {
+    background-color: var(--color-safe);
+    box-shadow: 0 0 10px var(--glow-safe);
+}
+        
+/*
+========================================
+--- RESPONSIVE DESIGN MEDIA QUERIES ---
+========================================
+*/
+
+/* Tablet & Surface Pro (Portrait/Snapped) */
+@media (max-width: 900px) {
+    #game-container {
+        flex-direction: column;
+        align-items: center;
+        max-width: 100%;
+        padding: 20px;
+        margin-top: 20px;
+        /* Add padding to bottom to prevent sticky bar from overlapping last panel */
+        padding-bottom: 170px;
+    }
+
+    #ui-panel {
+        width: 100%;
+        max-width: calc(var(--cell-size) * var(--grid-cols) + 6px);
+        flex-basis: auto;
+    }
+            
+    /* --- NEW: Swap Controls --- */
+    #controls-panel-box {
+        display: none; /* Hide the desktop controls panel */
+    }
+    #mobile-controls {
+        display: block; /* Show the sticky mobile controls */
+    }
+}
+
+/* Mobile Phones */
+@media (max-width: 500px) {
+    :root {
+        --cell-size: 22vw; 
+    }
+            
+    body {
+        padding: 0;
+    }
+
+    #game-container {
+        padding: 10px;
+        gap: 20px;
+        margin-top: 15px;
+        padding-bottom: 160px; /* Adjust padding for smaller controls */
+    }
+            
+    #navbar { padding: 0 10px; }
+    #navbar-brand { font-size: 1.2rem; }
+    #navbar-links { gap: 5px; }
+    #navbar-links li a { padding: 8px 10px; }
+            
+    .nav-text { display: none; }
+    .nav-icon, .nav-sound-icon { display: inline; font-size: 1.2rem; }
+
+    .agent { font-size: 10vw; }
+    .cell-content { font-size: 9vw; }
+    .grid-cell::before { font-size: 3vw; bottom: 2px; left: 3px; }
+
+    #ui-panel { max-width: 100%; min-width: 100%; }
+
+    #modal-content {
+        width: 100%;
+        height: 100%;
+        border-radius: 0;
+        padding: 15px;
+        box-sizing: border-box;
+    }
+    #modal-close { top: 5px; right: 15px; }
+            
+    /* Adjust sticky controls for smaller screen */
+    #mobile-controls {
+        padding: 10px;
+    }
+    #action-controls-mobile {
+        margin-top: 10px;
+    }
+    #controls-grid-mobile button {
+        padding: 12px;
+        font-size: 1.3rem;
+    }
+}
+        
+/* Tweak for very small mobile (e.g., iPhone 5/SE) */
+@media (max-width: 360px) {
+    :root {
+        --cell-size: 21vw;
+    }
+    #navbar-links li a { padding: 8px; }
+    #navbar-brand { font-size: 1.1rem; }
+}
